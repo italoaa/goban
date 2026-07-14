@@ -88,11 +88,10 @@
 (setq indent-tabs-mode nil)
 (setq tab-width 4)
 
-;; Use the Left Windows key as Meta
-(setq w32-lwindow-modifier 'meta)
-
-;; Use the Right Windows key as Meta
-(setq w32-rwindow-modifier 'meta)
+;; Use the Left/Right Windows keys as Meta on Windows builds.
+(when (eq system-type 'windows-nt)
+  (setq w32-lwindow-modifier 'meta
+        w32-rwindow-modifier 'meta))
 
 ;; font
 (set-face-attribute 'default nil :font "Aporetic Serif Mono")
@@ -130,26 +129,34 @@
       inhibit-startup-buffer-menu t)
 
 
-;; I prefer cmd key for meta
-(setq mac-option-key-is-meta nil
-      mac-command-key-is-meta t
-      mac-command-modifier 'meta
-      mac-option-modifier 'none)
+;; I prefer cmd key for meta on macOS builds.
+(when (eq system-type 'darwin)
+  (setq mac-option-key-is-meta nil
+        mac-command-key-is-meta t
+        mac-command-modifier 'meta
+        mac-option-modifier 'none))
 
 (setq user-full-name "Italo Amaya Arlotti"
       user-mail-address "italoamaya@me.com")
 
 ;; Common directories
-(setq gnus-home-directory "/home/italo/"
-      gnus-cache-directory (concat gnus-home-directory ".cache/emacs")
-      gnus-cache-active-file (concat gnus-home-directory ".cache/emacs/active")
-      config-dir (concat gnus-home-directory ".config/")
-      downloads-dir (concat gnus-home-directory "Downloads/")
-      org-directory (concat gnus-home-directory "org")
-      bread-dir (concat gnus-home-directory ".emacs.d/")
-      repos-dir (concat gnus-home-directory "repos/")
-      github-dir (concat repos-dir "github.com/")
-      italoaa-dir (concat github-dir "italoaa/"))
+(defvar italo-home-directory
+  (file-name-as-directory
+   (or (getenv "GOBAN_HOME")
+       (getenv "HOME")
+       (expand-file-name "~")))
+  "Base home directory for machine-specific paths.")
+
+(setq gnus-home-directory italo-home-directory
+      gnus-cache-directory (expand-file-name ".cache/emacs/" gnus-home-directory)
+      gnus-cache-active-file (expand-file-name ".cache/emacs/active" gnus-home-directory)
+      config-dir (expand-file-name ".config/" gnus-home-directory)
+      downloads-dir (expand-file-name "Downloads/" gnus-home-directory)
+      org-directory (expand-file-name "org/" gnus-home-directory)
+      bread-dir (expand-file-name ".emacs.d/" gnus-home-directory)
+      repos-dir (expand-file-name "repos/" gnus-home-directory)
+      github-dir (expand-file-name "github.com/" repos-dir)
+      italoaa-dir (expand-file-name "italoaa/" github-dir))
 
 
 (defun kill-all-except-dashboard-and-essential ()
@@ -360,19 +367,6 @@
   (interactive)
   (switch-to-buffer (get-buffer-create "*scratch-org*"))
   (org-mode))
-
-(defun hf-token (which)
-  "Load HF_TOKEN from 1Password into Emacs' environment.
-Interactively prompts for WHICH: personal, oc-read, or oc-write."
-  (interactive
-   (list (completing-read "HF token: " '("personal" "oc-read" "oc-write") nil t)))
-  (let* ((ref (pcase which
-                ("personal" "op://3jjpmvudv4ecxo6shvbtv47rqa/2igtoregnxwp5vg2kqnqbbw6si/credential")
-                ("oc-read"  "op://3jjpmvudv4ecxo6shvbtv47rqa/robqktsvh2yxualpcvb4f3bn5i/credential")
-                ("oc-write" "op://3jjpmvudv4ecxo6shvbtv47rqa/6x26qhkb2oecxevfyirnpo254e/credential")
-                (_ (user-error "Usage: hf-token {personal|oc-read|oc-write}"))))
-         (token (string-trim (shell-command-to-string (format "op read %s" (shell-quote-argument ref))))))
-    (setenv "HF_TOKEN" token)))
 
 (require 'hideshow)
 (add-hook 'python-ts-mode-hook #'hs-minor-mode)
@@ -1282,7 +1276,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
          "ANTHROPIC_API_KEY" "litellm-0e0c642f-b069-40a2-bb3a-1af9167cc2cd"
          "ANTHROPIC_BASE_URL" "http://localhost:4000"))
 
-  (add-to-list 'exec-path "/home/italo/.npm-global/bin")
+  (add-to-list 'exec-path (expand-file-name ".npm-global/bin" gnus-home-directory))
 
   ;; Evil state-specific RET behavior: insert mode = newline, normal mode = send
   (evil-define-key 'insert agent-shell-mode-map (kbd "RET") #'newline)
@@ -1331,7 +1325,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 (use-package occult)
 #+end_src
 ** TODO Git gutter and fringe
-#+begin_src text
+#+begin_src emacs-lisp
 (use-package git-gutter
   :hook (prog-mode . git-gutter-mode)
   :config
@@ -1367,7 +1361,6 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
     "X.......")
   )
 
-#+end_src
 #+end_src
 ** Jinx
 #+begin_src emacs-lisp
@@ -1528,44 +1521,6 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 
 #+RESULTS:
 : [nil 26403 21055 182396 nil elpaca-process-queues nil nil 0 nil
-** Company
-#+begin_src text
-(use-package company
-  :defer 2
-  :diminish
-  :config
-  ;; (setq company-backends
-        ;; '((company-capf company-dabbrev-code company-keywords)
-          ;; company-files
-          ;; company-dabbrev
-          ;; company-bbdb
-          ;; company-semantic
-          ;; company-cmake
-          ;; company-clang
-          ;; (company-gtags company-etags)
-          ;; company-oddmuse))
-  :custom
-  (company-minimum-prefix-length 3)
-  (company-show-numbers t)
-  (company-tooltip-align-annotations 't)
-  (setq company-minimum-prefix-length 3
-        company-idle-delay 0.0) ;; default is 0.2
-
-  ;; Different scroll margin
-  ;;(setq vertico-scroll-margin 0)
-
-  (global-company-mode t))
-
-(use-package company-box
-  :after company
-  :diminish
-  :hook (company-mode-hook . company-box-mode))
-
-#+end_src
-
-#+RESULTS:
-: [nil 26593 53866 542871 nil elpaca-process-queues nil nil 0 nil]
-
 ** ya-snippets
 #+begin_src emacs-lisp
 (use-package yasnippet
@@ -1911,8 +1866,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 (use-package rust-mode
   :config
   (setq rust-format-on-save t
-	rust-rustfmt-bin "/Users/italo/.cargo/bin/rustfmt"
-	rust-cargo-bin "/Users/italo/.cargo/bin/cargo"))
+	rust-rustfmt-bin (expand-file-name ".cargo/bin/rustfmt" gnus-home-directory)
+	rust-cargo-bin (expand-file-name ".cargo/bin/cargo" gnus-home-directory)))
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
@@ -1921,9 +1876,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 #+end_src
 ** C/C++
 #+begin_src emacs-lisp
-(add-hook 'c-mode-hook 'lsp)
-
-(add-hook 'c++-mode-hook 'lsp)
+(add-hook 'c-mode-hook 'eglot-ensure)
+(add-hook 'c++-mode-hook 'eglot-ensure)
 
 (use-package fancy-compilation)
 (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
