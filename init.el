@@ -74,7 +74,7 @@
      "ae426fc51c58ade49774264c17e666ea7f681d8cae62570630539be3d06fd964"
      default))
  '(inhibit-startup-screen t)
- '(package-selected-packages '(eglot))
+ '(package-selected-packages nil)
  '(safe-local-variable-directories
    '("/home/italo/openchip/fineforge/" "/opt/fineforge/occt/"
      "/home/italo/openchip/fineforge/occt/"
@@ -95,6 +95,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(org-document-title ((t (:inherit default :weight normal :height 2.0 :underline nil))))
  '(org-level-1 ((t (:inherit default :weight regular :height 1.75))))
  '(org-level-2 ((t (:inherit default :weight regular :height 1.5))))
  '(org-level-3 ((t (:inherit default :weight regular :height 1.25))))

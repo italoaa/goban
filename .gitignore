@@ -1,0 +1,11 @@
+eln-cache/
+elpa/
+elpaca/
+*.sh
+*.eld
+config.el
+auto-save-list/
+/.agent-shell/
+detached/
+org-roam.db
+tramp

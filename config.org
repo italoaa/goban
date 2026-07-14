@@ -3,9 +3,6 @@
 
 * Setup
 #+begin_src emacs-lisp
-;; elpaca
-(require 'elpaca-setup)
-
 ;; Backups
 (setq backup-by-copying t ; don't clobber symlinks
       backup-directory-alist '(("." . "~/.saves")) ; don't litter my fs tree
@@ -13,6 +10,13 @@
       kept-new-versions 6
       kept-old-versions 2
       version-control t)
+  (if init-file-debug
+      (setq use-package-verbose t
+            use-package-expand-minimally nil
+            use-package-compute-statistics t
+            debug-on-error t)
+    (setq use-package-verbose nil
+          use-package-expand-minimally t))
 #+end_src
 
 * Emacs
@@ -539,12 +543,11 @@ Interactively prompts for WHICH: personal, oc-read, or oc-write."
   )
 #+end_src
 
-** Perspective mode
+** PERSPECTIVE MODE
 #+begin_src emacs-lisp
 (use-package perspective
   :custom
   (persp-suppress-no-prefix-key-warning t)
-  :init
   (persp-mode))
 (force-mode-line-update)
 #+end_src
@@ -565,6 +568,7 @@ Interactively prompts for WHICH: personal, oc-read, or oc-write."
 	evil-split-window-below t)
 
   (setq evil-undo-system 'undo-redo)
+  :config
   (evil-mode))
 
 (use-package evil-surround
@@ -1326,8 +1330,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 #+begin_src emacs-lisp
 (use-package occult)
 #+end_src
-** Git gutter and fringe
-#+begin_src emacs-lisp
+** TODO Git gutter and fringe
+#+begin_src text
 (use-package git-gutter
   :hook (prog-mode . git-gutter-mode)
   :config
@@ -1387,8 +1391,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
   ;; (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
   ;; (add-to-list 'completion-at-point-functions #'cape-line)
   ;; Option 1: Specify explicitly to use Orderless for Eglot
-  (setq completion-category-overrides '((eglot (styles orderless))
-                                        (eglot-capf (styles orderless))))
+  ;; (setq completion-category-overrides '((eglot (styles orderless))
+                                        ;; (eglot-capf (styles orderless))))
 )
 
 #+end_src
@@ -1617,9 +1621,9 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 (require 'org-tempo)
 (require 'org-habit)
 
-(require 'ox-extra)
-(ox-extras-activate '(latex-header-blocks ignore-headlines))
-(add-to-list 'org-modules 'org-habit)
+;; (require 'ox-extra)
+;; (ox-extras-activate '(latex-header-blocks ignore-headlines))
+;; (add-to-list 'org-modules 'org-habit)
 
 #+end_src
 
