@@ -1673,7 +1673,12 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 #+begin_src emacs-lisp
 (use-package org-roam
   :config
-  (org-roam-db-autosync-mode 1)
+  ;; If the org-roam-directory do not exist then do not sync
+  (if (file-exists-p org-roam-directory)
+        (org-roam-db-sync)
+        (org-roam-db-autosync-mode 1)
+      )
+
   (setq org-roam-completion-everywhere t)
   )
 
