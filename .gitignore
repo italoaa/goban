@@ -1,4 +1,6 @@
 eln-cache/
+transient/
+recentf
 elpa/
 elpaca/
 *.sh

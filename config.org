@@ -75,7 +75,7 @@
 ;; Correct indentation ;)
 (add-hook 'rust-mode-hook
           (lambda () (setq indent-tabs-mode nil)))
-(menu-bar-mode t)
+(menu-bar-mode -1)
 (tool-bar-mode -1)
 (set-scroll-bar-mode nil)
 (blink-cursor-mode -1)
@@ -618,7 +618,7 @@
   :init
   (load-theme 'catppuccin :no-confirm)
   :config
-  (setq catppuccin-flavor 'latte) ;; or 'latte, 'macchiato, or 'mocha
+  (setq catppuccin-flavor 'mocha) ;; or 'latte, 'macchiato, or 'mocha
   (catppuccin-reload))
 
 ;; Select the modus vivendi theme
@@ -787,16 +787,6 @@
   (interactive "nTransparency Value 0 - 100 opaque:")
   (set-frame-parameter (selected-frame) 'alpha value))
 (transparency 96)
-#+end_src
-** All the icons and nerd
-#+begin_src emacs-lisp
-(use-package all-the-icons
-  :demand t
-  :if (display-graphic-p))
-
-(use-package nerd-icons-dired
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
 #+end_src
 ** Rainbow mode & beacon
 #+begin_src emacs-lisp
@@ -1276,7 +1266,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
          "ANTHROPIC_API_KEY" "litellm-0e0c642f-b069-40a2-bb3a-1af9167cc2cd"
          "ANTHROPIC_BASE_URL" "http://localhost:4000"))
 
-  (add-to-list 'exec-path (expand-file-name ".npm-global/bin" gnus-home-directory))
+  (add-to-list 'exec-path "/etc/profiles/per-user/italo/bin/claude-code-acp")
 
   ;; Evil state-specific RET behavior: insert mode = newline, normal mode = send
   (evil-define-key 'insert agent-shell-mode-map (kbd "RET") #'newline)
