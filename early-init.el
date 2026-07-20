@@ -20,6 +20,13 @@
 ;;; Code:
 
 (defvar elpaca-installer-version 0.12)
+
+;; Development builds can have no `emacs-build-time'.  Elpaca uses this
+;; value to date the Emacs core when its release table has no matching entry.
+(when (and (null emacs-build-time)
+           (string-prefix-p "31." emacs-version))
+  (setq emacs-build-time (current-time)))
+
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))

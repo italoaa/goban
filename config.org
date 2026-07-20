@@ -1,8 +1,10 @@
 #+title: Goban Emacs
 #+AUTHOR: Italo Amaya
 
-* Setup
+* Initialization
 #+begin_src emacs-lisp
+;;; config.el --- Generated from config.org -*- lexical-binding: t; -*-
+
 ;; Backups
 (setq backup-by-copying t ; don't clobber symlinks
       backup-directory-alist '(("." . "~/.saves")) ; don't litter my fs tree
@@ -20,7 +22,8 @@
 #+end_src
 
 * Emacs
-** Startup screen
+** Startup and defaults
+*** Startup screen
 #+begin_src emacs-lisp
 (setq initial-scratch-message "\
 ;; Don't Complain! 文句(もんく)より努力(どりょく)だよ
@@ -56,7 +59,7 @@
 
 (add-hook 'emacs-startup-hook #'my/org-todos-into-scratch)
 #+end_src
-** Emacs basics
+*** Emacs basics
 #+begin_src emacs-lisp
 (require 'server)
 (unless (server-running-p)
@@ -94,9 +97,6 @@
         w32-rwindow-modifier 'meta))
 
 ;; font
-(set-face-attribute 'default nil :font "Aporetic Serif Mono")
-(set-face-attribute 'default nil :height 165) ; For 12pt font
-
 (defun italo/set-font-faces ()
   (message "Setting faces!")
   (set-face-attribute 'default nil :font "Aporetic Serif Mono")
@@ -187,9 +187,9 @@
 (setq read-extended-command-predicate #'command-completion-default-include-p)
 
 
-(add-to-list 'custom-theme-load-path (concat bread-dir "./modules/themes"))
 #+end_src
-** Modeline
+** Interface
+*** Modeline
 #+begin_src emacs-lisp
 ;; so japanese characters dont lag
 
@@ -199,11 +199,10 @@
 
 (defun my-modeline--vc-branch ()
   "Get the current Git branch for the mode line."
-  (when vc-mode
-    (let ((branch (magit-get-current-branch)))
-      (if branch
-          (format "  %s " (car (split-string branch "-g" t))) ;; Extract branch name
-        ""))))
+  (let ((branch (and vc-mode (magit-get-current-branch))))
+    (if (stringp branch)
+        (format "  %s " (car (split-string branch "-g" t))) ;; Extract branch name
+      "")))
 
 (defvar-local my-modeline-vc-branch
     '(:eval
@@ -341,7 +340,7 @@
 		 (eq window (minibuffer-selected-window))))))))
 #+end_src
 
-** display buffer alist
+*** Display buffers
 #+begin_src emacs-lisp
 
 (setq evil-symbol-word-search t)
@@ -359,17 +358,17 @@
 	       (window-width . 80)))
 #+end_src
 
-** My Emacs funcs
+** Personal utilities
+*** My Emacs funcs
 #+begin_src emacs-lisp
 ;; make a function to open a new scratch buffer in org mode
 (defun new-scratch-org-buffer ()
   "Create a new scratch buffer in org mode"
   (interactive)
   (switch-to-buffer (get-buffer-create "*scratch-org*"))
-  (org-mode))
+(org-mode))
 
 (require 'hideshow)
-(add-hook 'python-ts-mode-hook #'hs-minor-mode)
 
 (defun my/python-hs-hide-class-methods ()
   "Fold all method defs inside the current Python class using hs-minor-mode."
@@ -507,10 +506,9 @@
 	(rename-buffer "*fish-term*")))))
 #+end_src
 
-#+RESULTS:
-
 * Packages
-** Spacious padding
+** Appearance and interface
+*** Spacious padding
 #+begin_src emacs-lisp
 (use-package spacious-padding
   :ensure t
@@ -537,7 +535,23 @@
   )
 #+end_src
 
-** PERSPECTIVE MODE
+*** Themes
+#+begin_src emacs-lisp
+(use-package modus-themes
+  :ensure t
+  :demand t
+  :config
+  (setq modus-themes-italic-constructs t
+        modus-themes-bold-constructs t)
+  (modus-themes-load-theme 'modus-vivendi))
+
+(use-package doric-themes
+  :ensure t
+  :demand t)
+#+end_src
+
+** Navigation and editing
+*** Perspective
 #+begin_src emacs-lisp
 (use-package perspective
   :custom
@@ -546,10 +560,7 @@
 (force-mode-line-update)
 #+end_src
 
-#+RESULTS:
-: [nil 26598 39609 55750 nil elpaca-process-queues nil nil 0 nil]
-
-** Evil
+*** Evil
 #+begin_src emacs-lisp
 ;; Expands to: (elpaca evil (use-package evil :demand t))
 (use-package evil
@@ -575,7 +586,7 @@
   :config
   (evil-collection-init))
 #+end_src
-** avy and flash
+*** Avy and flash
 #+begin_src emacs-lisp
 (use-package avy)
 (use-package avy-flash
@@ -584,47 +595,7 @@
   :config
   )
 #+end_src
-** themes
-#+begin_src emacs-lisp
-(use-package doom-themes
-  :demand t
-  :config
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  ;; (doom-themes-neotree-config)
-  ;; or for treemacs users
-  ;; (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  ;; (doom-themes-treemacs-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config)
-
-  ;; Require compline-theme.el and lauds-theme.el
-  (custom-available-themes)
-  )
-
-;; Themes
-;; Spacegrey    Grey and contrast code
-;; Miramare     greeny code and creamy text
-;; FlatWhite    to highlight instead of changing the color of text
-;; Gruvbox      to groove
-
-;; Use elpaca to load the theme to ensure doom-themes is laoded
-
-(use-package catppuccin-theme
-  :init
-  (load-theme 'catppuccin :no-confirm)
-  :config
-  (setq catppuccin-flavor 'mocha) ;; or 'latte, 'macchiato, or 'mocha
-  (catppuccin-reload))
-
-;; Select the modus vivendi theme
-;; (load-theme 'modus-vivendi t)
-#+end_src
-** Smartparens
+*** Smartparens
 #+begin_src emacs-lisp
 (use-package smartparens
   :diminish smartparens-mode
@@ -670,7 +641,7 @@
 
 #+end_src
 
-** undo-tree
+*** Undo tree
 #+begin_src emacs-lisp
 (use-package undo-tree
   :config
@@ -681,7 +652,8 @@
   (define-key evil-normal-state-map (kbd "C-r") 'undo-tree-redo)
   (global-undo-tree-mode 1))
 #+end_src
-** Projectile
+** Files, projects, and processes
+*** Projectile
 #+begin_src emacs-lisp
 (use-package projectile
   :config
@@ -690,7 +662,7 @@
 (use-package ag)
 (use-package rg)
 #+end_src
-** Dired
+*** Dired
 #+begin_src emacs-lisp
 (use-package dired-open
   :config
@@ -700,9 +672,6 @@
 (add-hook 'dired-mode-hook 'auto-revert-mode)
 
 (setq insert-directory-program "ls")  ;; Use exa instead of ls
-(setq dired-listing-switches "-lah")
-
-
 
 (with-eval-after-load 'dired
   (with-eval-after-load 'evil
@@ -724,18 +693,8 @@
   :after dired
   :hook (evil-normalize-keymaps . peep-dired-hook))
 #+end_src
-** Diminish
-#+begin_src emacs-lisp
-(use-package diminish)
-#+end_src
-** hl-todo
-#+begin_src emacs-lisp
-(use-package hl-todo
-  :config
-  (global-hl-todo-mode))
-
-#+end_src
-** detached
+** Processes and remote files
+*** Detached
 #+begin_src emacs-lisp
 (use-package detached
   :init
@@ -753,12 +712,13 @@
   (setq detached-notification-function #'detached-state-transitionion-echo-message))
 #+end_src
 
-** tramp
+*** Tramp
 #+begin_src emacs-lisp
 (setq tramp-default-method "ssh")
 #+end_src
 
-** PDF
+** Specialized modes
+*** PDF
 #+begin_src emacs-lisp
 (use-package pdf-tools
   :config
@@ -772,7 +732,7 @@
       (display-line-numbers-mode)))
   )
 #+end_src
-** LEDGER
+*** Ledger
 #+begin_src emacs-lisp
 (use-package hledger-mode
   ;; bing the mode to .journal and .hledger files
@@ -780,7 +740,8 @@
   :config
   (setq hledger-currency-string "EUR"))
 #+end_src
-** trasparency
+** Visual details
+*** Transparency
 #+begin_src emacs-lisp
 (defun transparency (value)
   "Sets the transparency of the frame window. 0=transparent/100=opaque"
@@ -788,7 +749,7 @@
   (set-frame-parameter (selected-frame) 'alpha value))
 (transparency 96)
 #+end_src
-** Rainbow mode & beacon
+*** Rainbow mode and beacon
 #+begin_src emacs-lisp
 (use-package rainbow-mode
   :diminish
@@ -797,7 +758,7 @@
   :config
   (pulsar-global-mode 1))
 #+end_src
-** which-key
+*** Which-key
 #+begin_src emacs-lisp
 (use-package which-key
   :init
@@ -818,11 +779,16 @@
         which-key-allow-imprecise-window-fit nil
         which-key-separator " → " ))
 #+end_src
-** Svg tag mode
+*** Diminish
+#+begin_src emacs-lisp
+(use-package diminish)
+#+end_src
+*** SVG tag mode
 #+begin_src emacs-lisp
 (use-package svg-tag-mode)
 #+end_src
-** General (keybindings)
+** Keybindings
+*** General (keybindings)
 The keybindings of emacs is like the flour of the bread. Because I come from doom emacs these follow the keybindings from DT's configuration who is also a doom emacs user! [[https://gitlab.com/dwt1/configuring-emacs/-/blob/main/06-cleaning-up-the-config/config.org?ref_type=heads#evil][Original config]].
 
 #+begin_src emacs-lisp
@@ -1113,15 +1079,14 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 ;; (evil-define-key 'normal dired-mode-map (kbd "C-u") #'evil-scroll-up)
 #+end_src
 
-#+RESULTS:
-: [nil 26593 55668 903268 nil elpaca-process-queues nil nil 0 nil]
-
-** magit
+** Version control
+*** Magit
 #+begin_src emacs-lisp
 (use-package transient)
 (use-package magit)
 #+end_src
-** Folding
+** Structure and navigation aids
+*** Folding
 #+begin_src emacs-lisp
 (use-package kirigami
   :commands (kirigami-open-fold
@@ -1236,16 +1201,15 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 ;; Hooks
 (add-hook 'markdown-mode-hook #'outline-minor-mode)
 #+end_src
-** Indent bars mode
+*** Indent bars mode
 #+begin_src emacs-lisp
 (use-package indent-bars
   :ensure (:host github :repo "jdtsmith/indent-bars" :files ("indent-bars.el"))
   :hook ((python-ts-mode yaml-ts-mode) . indent-bars-mode)) ; or whichever modes you prefer
 #+end_src
 
-#+RESULTS:
-: [nil 26605 3971 531667 nil elpaca-process-queues nil nil 0 nil]
-** AI
+** AI and language tools
+*** AI
 #+begin_src emacs-lisp
 (use-package copilot
   :ensure t
@@ -1280,10 +1244,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 
 #+end_src
 
-#+RESULTS:
-: [nil 26852 48212 21012 nil elpaca-process-queues nil nil 30000 nil]
-
-** Treesit
+** Syntax and structure
+*** Treesit
 #+begin_src emacs-lisp
 (use-package combobulate
    :ensure (:host github :repo "mickeynp/combobulate" :files ("*.el"))
@@ -1298,10 +1260,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
   (global-treesit-auto-mode))
 #+end_src
 
-#+RESULTS:
-: [nil 26999 13373 340540 nil elpaca-process-queues nil nil 719000 nil]
-
-** Topsy
+*** Topsy
 #+begin_src emacs-lisp
 (use-package topsy
   :ensure (:host github :repo "alphapapa/topsy.el" :files ("topsy.el"))
@@ -1310,11 +1269,12 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
   (magit-section-mode . topsy-mode))
 
 #+end_src
-** Occult
+*** Occult
 #+begin_src emacs-lisp
 (use-package occult)
 #+end_src
-** TODO Git gutter and fringe
+** Diagnostics and spelling
+*** TODO Git gutter and fringe
 #+begin_src emacs-lisp
 (use-package git-gutter
   :hook (prog-mode . git-gutter-mode)
@@ -1352,12 +1312,20 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
   )
 
 #+end_src
-** Jinx
+*** Jinx
 #+begin_src emacs-lisp
 (use-package jinx
   :hook (emacs-startup . global-jinx-mode))
 #+end_src
-** Cape
+*** Hl-todo
+#+begin_src emacs-lisp
+(use-package hl-todo
+  :config
+  (global-hl-todo-mode))
+
+#+end_src
+** Completion
+*** Cape
 #+begin_src emacs-lisp
 (use-package cape
   :init
@@ -1379,7 +1347,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 )
 
 #+end_src
-** Corfu
+*** Corfu
 #+begin_src emacs-lisp
 (use-package corfu
   ;; Optionally use TAB for cycling, default is `corfu-complete'.
@@ -1405,10 +1373,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
   )
 #+end_src
 
-#+RESULTS:
-: [nil 26935 57523 413344 nil elpaca-process-queues nil nil 858000 nil]
-
-** Vertico consult and marginalia
+*** Vertico, Consult, and Marginalia
 #+begin_src emacs-lisp
 (use-package vertico
   :init
@@ -1509,9 +1474,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
         completion-category-overrides '((file (styles partial-completion)))))
 #+end_src
 
-#+RESULTS:
-: [nil 26403 21055 182396 nil elpaca-process-queues nil nil 0 nil
-** ya-snippets
+** Snippets and integrations
+*** Yasnippet
 #+begin_src emacs-lisp
 (use-package yasnippet
   :demand t
@@ -1521,14 +1485,15 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 (use-package yasnippet-snippets
   :demand t)
 #+end_src
-** Kubed
+*** Kubed
 #+begin_src emacs-lisp
 (use-package kubed
   :config
   (keymap-global-set "C-c k" 'kubed-prefix-map))
 #+end_src
 * Org mode
-** Variables
+** Core settings
+*** Variables
 #+begin_src emacs-lisp
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -1557,8 +1522,6 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 (setq org-edit-src-content-indentation 0)
 (setq org-clock-sound (concat user-emacs-directory "bell.wav"))
 
-(setq org-image-actual-width nil)
-
 (setq org-agenda-files
       '("~/org/Agenda/2026/outlook.org"))
 
@@ -1572,10 +1535,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 
 #+end_src
 
-#+RESULTS:
-| org-habit | ol-doi | ol-w3m | ol-bbdb | ol-bibtex | ol-docview | ol-gnus | ol-info | ol-irc | ol-mhe | ol-rmail | ol-eww |
-
-** org latex
+** Export and attachments
+*** Org LaTeX
 #+begin_src emacs-lisp
 (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
 (setq org-latex-pdf-process
@@ -1589,15 +1550,13 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 ;; (plist-put org-format-latex-options :background nil)
 #+end_src
 
-#+RESULTS:
-
 #+begin_src emacs-lisp
 (use-package engrave-faces
   :ensure t
   :init
   (setq org-latex-src-block-backend 'engraved))
 #+end_src
-** org download
+*** Org download
 #+begin_src emacs-lisp
 (use-package org-download
     :after org
@@ -1613,7 +1572,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
     (require 'org-download)
     (org-download-enable))
 #+end_src
-** org appear
+** Editing and appearance
+*** Org appear
 #+begin_src emacs-lisp
 (use-package org-appear
   :commands (org-appear-mode)
@@ -1624,7 +1584,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
         org-appear-autolinks nil        ;; Don't enable on links
         org-appear-autosubmarkers t))    ;; Enable on subscript and superscript
 #+end_src
-** org Babel
+** Execution
+*** Org Babel
 #+begin_src emacs-lisp
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -1632,7 +1593,12 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 
 (setq org-confirm-babel-evaluate nil)
 #+end_src
-** org modern
+*** Org Babel async
+#+begin_src emacs-lisp
+(use-package ob-async)
+#+end_src
+** Visual layout
+*** Org modern
 #+begin_src emacs-lisp
 (use-package org-modern
   :after org
@@ -1641,7 +1607,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
                       :height 150)
   (global-org-modern-mode))
 #+end_src
-** org modern indent/ sidebar/tidy
+*** Org modern indent, sidebar, and tidy
 #+begin_src emacs-lisp
 (use-package org-modern-indent
  :ensure (:host github :repo "jdtsmith/org-modern-indent")
@@ -1655,11 +1621,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 ;;   (org-mode . org-tidy-mode))
 #+end_src
 
-** ob Async
-#+begin_src emacs-lisp
-(use-package ob-async)
-#+end_src
-** org roam & UI
+** Knowledge management
+*** Org-roam and UI
 #+begin_src emacs-lisp
 (use-package org-roam
   :config
@@ -1820,7 +1783,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
         org-roam-ui-open-on-start t))
 #+end_src
 * Languages
-** Latex
+** Writing and markup
+*** LaTeX
 #+begin_src emacs-lisp
 ;; bind tab to outline-cycle
 ;; prettify symbols in LaTeX mode
@@ -1831,7 +1795,6 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
   ;; (add-hook 'LaTeX-mode-hook 'prettify-symbols-mode)
   (with-eval-after-load 'outline
 	(define-key outline-minor-mode-map (kbd "<tab>") 'outline-cycle)))
-(use-package evil-surround)
 (use-package evil-embrace
   :config
   (evil-embrace-enable-evil-surround-integration))
@@ -1840,23 +1803,19 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
   (add-hook 'LaTex-mode-hook 'evil-tex-mode))
 #+end_src
 
-#+RESULTS:
-: [nil 26983 41735 567930 nil elpaca-process-queues nil nil 345000 nil]
-
 ** Programming
+*** Common programming setup
 #+begin_src emacs-lisp
 (add-hook 'prog-mode-hook #'hs-minor-mode)
-(add-hook 'python-ts-mode-hook #'hs-minor-mode)
 
 (setq m/pyright-uvx-command
       '("uvx" "--from" "pyright==1.1.403" "pyright-langserver" "--" "--stdio"))
 
 (require 'eglot)
-(add-hook 'python-ts-mode-hook 'eglot-ensure)
 ;; (add-to-list 'eglot-server-programs `(python-ts-mode . ,m/pyright-uvx-command))
 #+end_src
 
-** Rust [0/3]
+*** Rust [0/3]
 #+begin_src emacs-lisp
 (use-package rust-mode
   :config
@@ -1869,7 +1828,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
                '((rust-mode rust-ts-mode) .
 		 ("rust-analyzer" :initializationOptions (:check (:command "clippy"))))))
 #+end_src
-** C/C++
+*** C/C++
 #+begin_src emacs-lisp
 (add-hook 'c-mode-hook 'eglot-ensure)
 (add-hook 'c++-mode-hook 'eglot-ensure)
@@ -1877,7 +1836,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 (use-package fancy-compilation)
 (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 #+end_src
-** Python
+*** Python
 #+begin_src emacs-lisp
 ;;; From https://robbmann.io/posts/emacs-eglot-pyrightconfig/ Thanks!!
 (defun pyrightconfig-write (virtualenv)
@@ -1912,8 +1871,6 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
     ;; location
     (with-temp-file out-file (insert out-contents))))
 
-(add-hook 'python-ts-mode-hook #'eglot-ensure)
-
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
                '((python-mode python-ts-mode)
@@ -1930,46 +1887,47 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 (use-package flyover)
 #+end_src
 
-*** Config
+**** Python config
 #+begin_src emacs-lisp
 (setq python-shell-interpreter "uv run"
       python-shell-virtualenv-root ".venv/"
       org-babel-python-command "uv run")
       ;; lsp-pyright-venv-path "/usr/local/anaconda3")
 #+end_src
-** Nix
+** Other language and data modes
+*** Nix
 #+begin_src emacs-lisp
 (use-package nix-mode)
 (add-to-list 'auto-mode-alist '("\\.nix\\'" . nix-mode))
 #+end_src
-** html
+*** HTML
 #+begin_src emacs-lisp
 (use-package emmet-mode)
 (add-to-list 'auto-mode-alist '("\\.html\\'" . emmet-mode))
 #+end_src
-** Markdown
+*** Markdown
 #+begin_src emacs-lisp
 (use-package markdown-mode)
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 #+end_src
-** Yaml
+*** YAML
 #+begin_src emacs-lisp
 (use-package yaml-mode)
 #+end_src
-** Docker
+*** Docker
 #+begin_src emacs-lisp
 (use-package dockerfile-mode)
 (use-package docker-compose-mode)
 #+end_src
-** Csv
+*** CSV
 #+begin_src emacs-lisp
 (use-package csv-mode)
 #+end_src
-** Just
+*** Just
 #+begin_src emacs-lisp
 (use-package just-mode)
 #+end_src
-* Ends
+* Final adjustments
 #+begin_src emacs-lisp
 (set-scroll-bar-mode nil)
 
