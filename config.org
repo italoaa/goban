@@ -1815,7 +1815,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 ;; (add-to-list 'eglot-server-programs `(python-ts-mode . ,m/pyright-uvx-command))
 #+end_src
 
-*** Rust [0/3]
+*** Rust
 #+begin_src emacs-lisp
 (use-package rust-mode
   :config
