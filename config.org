@@ -34,18 +34,19 @@
 
 (defun my/org-collect-todos ()
   "Return a list of todo headings from ~/todo.org."
-  (let (todos)
-    (with-current-buffer (find-file-noselect "~/todo.org")
-      (org-with-wide-buffer
-        (org-map-entries
-         (lambda ()
-           (let ((todo  (org-get-todo-state))
-                 (title (org-get-heading t t t t)))
-             (when todo
-               (push (format "[%s] %s" todo title) todos))))
-         ;; Match any heading with a TODO keyword
-         "TODO={.+}" 'file)))
-    (nreverse todos)))
+  (when (file-readable-p "~/todo.org")
+    (let (todos)
+      (with-current-buffer (find-file-noselect "~/todo.org")
+        (org-with-wide-buffer
+          (org-map-entries
+           (lambda ()
+             (let ((todo  (org-get-todo-state))
+                   (title (org-get-heading t t t t)))
+               (when todo
+                 (push (format "[%s] %s" todo title) todos))))
+           ;; Match any heading with a TODO keyword
+           "TODO={.+}" 'file)))
+      (nreverse todos))))
 
 (defun my/org-todos-into-scratch ()
   "Append Org TODOs from ~/todo.org into *scratch*."
@@ -62,7 +63,7 @@
 *** Emacs basics
 #+begin_src emacs-lisp
 (require 'server)
-(unless (server-running-p)
+(unless (or noninteractive (server-running-p))
   (server-start))
 
 (setq-default indent-tabs-mode nil)
@@ -1435,8 +1436,6 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
    consult-theme :preview-key '(:debounce 0.2 any)
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
    ;; :preview-key "M-."
    :preview-key '(:debounce 0.4 any))
 
@@ -1910,11 +1909,6 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 #+begin_src emacs-lisp
 (use-package emmet-mode)
 (add-to-list 'auto-mode-alist '("\\.html\\'" . emmet-mode))
-#+end_src
-*** Markdown
-#+begin_src emacs-lisp
-(use-package markdown-mode)
-(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 #+end_src
 *** YAML
 #+begin_src emacs-lisp
