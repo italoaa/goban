@@ -542,12 +542,18 @@
   :demand t
   :config
   (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs t)
-  (modus-themes-load-theme 'modus-vivendi))
+        modus-themes-bold-constructs t))
 
 (use-package doric-themes
   :ensure t
-  :demand t)
+  :demand t
+  :config
+  (let ((theme (cdr (assoc system-name
+                           '(("sansan" . doric-fire)
+                             ("LT-5CD5215FNH" . doric-obsidian))))))
+    (if theme
+        (doric-themes-load-theme theme)
+      (modus-themes-load-theme 'modus-vivendi))))
 #+end_src
 
 ** Navigation and editing
