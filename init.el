@@ -32,7 +32,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("530e730924892af285af79d88339048da48c572a3c974882682eadb9881fb051"
+   '("2493d0ad0bb94bd2ad297a6d76288751a532fd6d8d6af694ac14008caa6b7fa2"
+     "530e730924892af285af79d88339048da48c572a3c974882682eadb9881fb051"
      "0d7a8edff6a900b5a642f9014d394661c377baeaaab64f2b62fc70701bb12b18"
      "e4fc3c202ee94a1570a645ca8b7388f4fe783e52ac47ea141a22bef26e0b2e89"
      "10e330880269244ae45ae9e02fe6f55766da9e15036e7c7f07d7ce228195deb5"
