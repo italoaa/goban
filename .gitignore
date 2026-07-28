@@ -11,3 +11,6 @@ auto-save-list/
 detached/
 org-roam.db
 tramp
+request/
+tree-sitter/
+url/

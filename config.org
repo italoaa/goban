@@ -704,19 +704,28 @@
 *** Detached
 #+begin_src emacs-lisp
 (use-package detached
+  :ensure (detached
+           :type git
+           :host github
+           :repo "italoaa/detached.el"
+           :protocol https
+           :depth treeless
+           :inherit nil
+           :files (:defaults))
   :init
   (detached-init)
-  :bind (;; Replace `async-shell-command' with `detached-shell-command'
-         ([remap async-shell-command] . detached-shell-command)
-         ;; Replace `compile' with `detached-compile'
-         ([remap compile] . detached-compile)
-         ([remap recompile] . detached-compile-recompile)
-         ;; Replace built in completion of sessions with `consult'
-         ([remap detached-open-session] . detached-consult-session))
-  :custom ((detached-show-output-on-attach t)
-          (detached-terminal-data-command system-type))
-  :config
-  (setq detached-notification-function #'detached-state-transitionion-echo-message))
+
+  :bind
+  (([remap async-shell-command] . detached-shell-command)
+   ([remap compile] . detached-compile)
+   ([remap recompile] . detached-compile-recompile)
+   ([remap detached-open-session] . detached-consult-session))
+
+  :custom
+  ((detached-show-output-on-attach t)
+   (detached-terminal-data-command system-type)
+   (detached-notification-function
+    #'detached-state-transition-echo-message)))
 #+end_src
 
 *** Tramp
@@ -1809,6 +1818,28 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 #+end_src
 
 ** Programming
+*** GitLab
+#+begin_src emacs-lisp
+(use-package lab
+  :ensure (:host github :repo "isamert/lab.el")
+  :config
+  ;; Required.
+  (setq lab-host "https://gitlab.openchip.local")
+
+  ;; Required.
+  ;; See the following link to learn how you can gather one for yourself:
+  ;; https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token
+
+  ;; execute the following for the token
+  ;; op item get epmkif7jk5sgrrwxktf372xkj4 --reveal --fields label=credential --format json | jq .value
+  ;; take out the first and last character of the string to remove the quotes
+
+  (setq lab-token (string-trim (shell-command-to-string "op item get epmkif7jk5sgrrwxktf372xkj4 --reveal --fields label=credential --format json | jq .value | sed 's/^\"//;s/\"$//'")))
+
+  ;; Optional, but useful. See the variable documentation.
+  (setq lab-group "booster")
+  )
+#+end_src
 *** Common programming setup
 #+begin_src emacs-lisp
 (add-hook 'prog-mode-hook #'hs-minor-mode)
@@ -1825,7 +1856,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 (use-package rust-mode
   :config
   (setq rust-format-on-save t
-	rust-rustfmt-bin (expand-file-name ".cargo/bin/rustfmt" gnus-home-directory)
+        rust-rustfmt-bin (expand-file-name ".cargo/bin/rustfmt" gnus-home-directory)
 	rust-cargo-bin (expand-file-name ".cargo/bin/cargo" gnus-home-directory)))
 
 (with-eval-after-load 'eglot
