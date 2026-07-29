@@ -85,8 +85,8 @@
  '(inhibit-startup-screen t)
  '(package-selected-packages nil)
  '(safe-local-variable-directories
-   '("/home/italo/openchip/fineforge/" "/opt/fineforge/occt/"
-     "/home/italo/openchip/fineforge/occt/"
+   '("/home/italo/personal/Ledger/" "/home/italo/openchip/fineforge/"
+     "/opt/fineforge/occt/" "/home/italo/openchip/fineforge/occt/"
      "/home/italo/openchip/aios-templates/"
      "/home/italo/openchip/occt/"
      "/home/italo/openchip/occt/src/occt/verifiable_compute/svip/"
