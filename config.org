@@ -688,7 +688,7 @@
     (evil-define-key 'normal peep-dired-mode-map (kbd "j") 'peep-dired-next-file)
     (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file)))
 
-(setopt dired-listing-switches (string-join '("--all"
+(setopt dired-listing-switches (string-join '("-a"
                                               "--human-readable"
                                               "--time-style=long-iso"
                                               "--group-directories-first"
@@ -1841,22 +1841,23 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 * Languages
 ** Writing and markup
 *** LaTeX
+commented auctex and evil tex because of slow pulls? i think either way it did not work
 #+begin_src emacs-lisp
 ;; bind tab to outline-cycle
 ;; prettify symbols in LaTeX mode
-(use-package auctex
-  :defer t
-  :config
-  (add-hook 'LaTeX-mode-hook 'outline-minor-mode)
+;; (use-package auctex
+  ;; :defer t
+  ;; :config
+  ;; (add-hook 'LaTeX-mode-hook 'outline-minor-mode)
   ;; (add-hook 'LaTeX-mode-hook 'prettify-symbols-mode)
-  (with-eval-after-load 'outline
-	(define-key outline-minor-mode-map (kbd "<tab>") 'outline-cycle)))
+  ;; (with-eval-after-load 'outline
+	;; (define-key outline-minor-mode-map (kbd "<tab>") 'outline-cycle)))
 (use-package evil-embrace
   :config
   (evil-embrace-enable-evil-surround-integration))
-(use-package evil-tex
-  :config
-  (add-hook 'LaTex-mode-hook 'evil-tex-mode))
+;; (use-package evil-tex
+  ;; :config
+  ;; (add-hook 'LaTex-mode-hook 'evil-tex-mode))
 #+end_src
 
 ** Programming
