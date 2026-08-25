@@ -664,6 +664,19 @@
 #+begin_src emacs-lisp
 (use-package projectile
   :config
+  (with-eval-after-load 'projectile
+    ;; 1. Use 'alien / 'hybrid indexing so Emacs never walks files manually
+    (setq projectile-indexing-method 'hybrid)
+    
+    ;; 2. Rely on internal project caching
+    (setq projectile-enable-caching t)
+    
+    ;; 3. Defend against indexing your entire home directory
+    (add-to-list 'projectile-globally-ignored-directories "~/")
+    
+    ;; 4. Explicitly block typical massive dev and target folders
+    (dolist (dir '(".git" "node_modules" "target" "build" ".elpa" "dist" ".cache"))
+      (add-to-list 'projectile-globally-ignored-directories dir)))
   (projectile-mode 1))
 
 (use-package ag)
