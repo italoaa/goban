@@ -932,7 +932,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
     "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
     "b d" '(bookmark-delete :wk "Delete bookmark")
     "b i" '(ibuffer :wk "Ibuffer")
-    "b k" '(kill-buffer :wk "Kill this buffer")
+    "b k" '(kill-current-buffer :wk "Kill this buffer")
     "b K" '(kill-all-except-dashboard-and-essential :wk "Kill All except escential")
     "b l" '(list-bookmarks :wk "List bookmarks")
     "b j" '(bookmark-jump :wk "Bookmark Jump")
