@@ -1245,6 +1245,8 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 (use-package copilot
   :ensure t
   :hook (prog-mode . copilot-mode)
+  :custom
+  (setq copilot-indent-offset-warning-disable t)
   :bind (:map copilot-completion-map
               ("C-<tab>" . copilot-accept-completion)
               ("C-TAB" . copilot-accept-completion)))
@@ -1292,7 +1294,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 #+end_src
 
 *** Topsy
-#+begin_src emacs-lisp
+#+begin_src text
 (use-package topsy
   :ensure (:host github :repo "alphapapa/topsy.el" :files ("topsy.el"))
   :hook
