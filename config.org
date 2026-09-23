@@ -31,6 +31,42 @@
 ")
 
 (require 'org)
+(require 'seq)
+
+(defun my/recent-git-projects (&optional limit)
+  "Return up to LIMIT recently visited Git project directories.
+
+Project recency is derived from `recentf-list', which is ordered by the
+most recently visited files."
+  (let ((limit (or limit 3))
+        projects)
+    (dolist (file (and (boundp 'recentf-list) recentf-list))
+      (when (and (< (length projects) limit)
+                 (not (file-remote-p file)))
+        (when-let* ((directory (file-name-directory file))
+                    (root (locate-dominating-file directory ".git"))
+                    (project (directory-file-name
+                              (abbreviate-file-name root))))
+          (unless (member project projects)
+            (setq projects (append projects (list project)))))))
+    projects))
+
+(defun my/recent-items-into-scratch ()
+  "Append recent Git projects and files to the *scratch* buffer."
+  (let ((projects (my/recent-git-projects 3))
+        (files (seq-take (and (boundp 'recentf-list) recentf-list) 3)))
+    (with-current-buffer (get-buffer-create "*scratch*")
+      (goto-char (point-max))
+      (insert ";; ===== Recent Git projects =====\n")
+      (if projects
+          (dolist (project projects)
+            (insert ";; - " project "\n"))
+        (insert ";; - No recent Git projects\n"))
+      (insert "\n;; ===== Recent files =====\n")
+      (if files
+          (dolist (file files)
+            (insert ";; - " (abbreviate-file-name file) "\n"))
+        (insert ";; - No recent files\n")))))
 
 (defun my/org-collect-todos ()
   "Return a list of todo headings from ~/todo.org."
@@ -58,7 +94,12 @@
         (dolist (item todos)
           (insert ";; - " item "\n"))))))
 
-(add-hook 'emacs-startup-hook #'my/org-todos-into-scratch)
+(defun my/populate-scratch ()
+  "Add recent items and Org TODOs to the initial scratch buffer."
+  (my/recent-items-into-scratch)
+  (my/org-todos-into-scratch))
+
+(add-hook 'emacs-startup-hook #'my/populate-scratch)
 #+end_src
 *** Emacs basics
 #+begin_src emacs-lisp
@@ -206,9 +247,9 @@
       "")))
 
 (defvar-local my-modeline-vc-branch
-    '(:eval
-      (when (mode-line-window-selected-p)
-	(propertize (my-modeline--vc-branch) 'face 'font-lock-comment-face)))
+  '(:eval
+    (when (mode-line-window-selected-p)
+      (propertize (my-modeline--vc-branch) 'face 'font-lock-comment-face)))
   "Mode line construct to display the current Git branch.")
 
 (put 'my-modeline-vc-branch 'risky-local-variable t)
@@ -274,6 +315,10 @@
 		my-modeline-vc-branch
 		" "
 		my-modeline-focus-item
+                " "
+                (:eval
+                 (when (fboundp 'poimap-string)
+                   (poimap-string)))
                 ))
 
 ;; Rest of your existing code
@@ -305,7 +350,7 @@
                 'face (if (mode-line-window-selected-p)
                           'elpaca-busy  ;; Face when window is selected
                         'shadow)))  ;; Face when window is not selected
-    "Mode line construct to display the buffer name with conditional formatting.")
+  "Mode line construct to display the buffer name with conditional formatting.")
 
 (put 'my-modeline-buffer-name 'risky-local-variable t)
 
@@ -314,14 +359,14 @@
   (capitalize (symbol-name major-mode)))
 
 (defvar-local my-modeline-major-mode
-    '(:eval
-      (list
-       (propertize "雨" 'face 'shadow)
-       " "
-      (when (mode-line-window-selected-p)
+  '(:eval
+    (list
+     (propertize "雨" 'face 'shadow)
+     " "
+     (when (mode-line-window-selected-p)
        (propertize (my-modeline--major-mode-name) 'face 'bold))
-      )
-      )
+     )
+    )
   "Mode line construct to display the major mode.")
 
 (put 'my-modeline-major-mode 'risky-local-variable t)
@@ -340,6 +385,8 @@
 	       (with-selected-window (minibuffer-window)
 		 (eq window (minibuffer-selected-window))))))))
 #+end_src
+
+#+RESULTS:
 
 *** Display buffers
 #+begin_src emacs-lisp
@@ -535,6 +582,35 @@
            :mode-line-inactive spacious-padding-subtle-mode-line-inactive))
   )
 #+end_src
+
+*** Poimap
+#+begin_src emacs-lisp
+(use-package poimap
+    :ensure (:host github :repo "florommel/poimap")
+    :init
+    (setq poimap-add-to-mode-line nil
+          poimap-height 1.35
+          poimap-width 0.38)
+    :config
+    (poimap-mode 1)
+
+    (require 'poimap-bookmark)
+    (require 'poimap-current-symbol)
+    (require 'poimap-flymake)
+    (require 'poimap-imenu)
+    (require 'poimap-isearch)
+    (require 'poimap-register)
+
+    (poimap-bookmark 1)
+    (poimap-current-symbol 1)
+    (poimap-flymake 1)
+    (poimap-imenu 1)
+    (poimap-isearch 1)
+    (poimap-register 1))
+#+end_src
+
+#+RESULTS:
+: [nil 27315 52535 746020 nil elpaca-process-queues nil nil 942000 nil]
 
 *** Themes
 #+begin_src emacs-lisp
@@ -745,6 +821,35 @@
 #+begin_src emacs-lisp
 (setq tramp-default-method "ssh")
 #+end_src
+
+*** ghostel
+#+begin_src emacs-lisp
+(use-package ghostel
+  :bind
+  ("C-SPC" . my/toggle-ghostel-panel)
+  :init
+  (defun my/toggle-ghostel-panel ()
+    "Toggle a ghostel terminal in a side window along the bottom of the frame."
+    (interactive)
+    (if-let* ((win (seq-find
+                    (lambda (w)
+                      (and (eq (window-parameter w 'window-side) 'bottom)
+                           (with-current-buffer (window-buffer w)
+                             (derived-mode-p 'ghostel-mode))))
+                    (window-list))))
+        (delete-window win)
+      (let ((display-buffer-overriding-action
+             '((display-buffer-in-side-window)
+               (side . bottom)
+               (slot . 0)
+               (window-height . 0.33)
+               (dedicated . t)
+               (preserve-size . (nil . t)))))
+        (ghostel-project)))))
+#+end_src
+
+#+RESULTS:
+: [nil 27315 56187 41882 nil elpaca-process-queues nil nil 341000 nil]
 
 ** Specialized modes
 *** PDF
@@ -2018,8 +2123,24 @@ commented auctex and evil tex because of slow pulls? i think either way it did n
   (setf (alist-get 'python-ts-mode apheleia-mode-alist)
         '(ruff-isort ruff)))
 
-(use-package flyover)
+(use-package flyover
+  :hook (flymake-mode . flyover-mode)
+  :custom
+  ;; Eglot reports diagnostics through Flymake.
+  (flyover-checkers '(flymake))
+  (flyover-levels '(error warning info))
+  (flyover-display-mode 'always)
+  (flyover-hide-checker-name t)
+  (flyover-use-theme-colors t)
+  (flyover-show-virtual-line t)
+  (flyover-virtual-line-type 'curved-dotted-arrow)
+  (flyover-wrap-messages t)
+  (flyover-max-line-length 80)
+  (flyover-hide-during-completion t))
 #+end_src
+
+#+RESULTS:
+: [nil 27315 53234 754091 nil elpaca-process-queues nil nil 126000 nil]
 
 **** Python config
 #+begin_src emacs-lisp
