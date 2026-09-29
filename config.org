@@ -111,7 +111,9 @@ most recently visited files."
 (setq whitespace-style '(face tabs trailing tab-mark))
 (global-whitespace-mode 1)
 (recentf-mode)
-;; (add-to-list 'default-frame-alist '(undecorated . t))
+(if (eq system-type 'darwin)
+    (add-to-list 'default-frame-alist '(undecorated . t))
+  )
 ;;(elpaca nil (setq mu4e-mu-version "1.10.8"))
 (defun my/toggle-undecorated-frame ()
   (interactive)
@@ -767,7 +769,10 @@ most recently visited files."
 
 (add-hook 'dired-mode-hook 'auto-revert-mode)
 
-(setq insert-directory-program "ls")  ;; Use exa instead of ls
+(if (eq system-type 'darwin)
+    (setq insert-directory-program "/run/current-system/sw/bin/ls")
+    (setq insert-directory-program "ls")
+    )
 
 (with-eval-after-load 'dired
   (with-eval-after-load 'evil
@@ -777,18 +782,29 @@ most recently visited files."
     (evil-define-key 'normal peep-dired-mode-map (kbd "j") 'peep-dired-next-file)
     (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file)))
 
-(setopt dired-listing-switches (string-join '("-a"
-                                              "--human-readable"
-                                              "--time-style=long-iso"
-                                              "--group-directories-first"
-                                              "-lv1")
-                                            " "))
+(if (eq system-type 'darwin)
+    (setopt dired-listing-switches (string-join '("-alh --group-directories-first"
+                                                  "--time-style=long-iso"
+                                                  "--group-directories-first"
+                                                  "-lv1")
+                                                " "))
+    (setopt dired-listing-switches (string-join '("-a"
+                                                  "--human-readable"
+                                                  "--time-style=long-iso"
+                                                  "--group-directories-first"
+                                                  "-lv1")
+                                                " "))
+  )
 
 (add-hook 'dired-mode-hook #'dired-hide-details-mode)
 (use-package peep-dired
   :after dired
   :hook (evil-normalize-keymaps . peep-dired-hook))
 #+end_src
+
+#+RESULTS:
+: [nil 27319 55944 19520 nil elpaca-process-queues nil nil 0 nil]
+
 ** Processes and remote files
 *** Detached
 #+begin_src emacs-lisp
@@ -1347,14 +1363,16 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 ** AI and language tools
 *** AI
 #+begin_src emacs-lisp
-(use-package copilot
-  :ensure t
-  :hook (prog-mode . copilot-mode)
-  :custom
-  (setq copilot-indent-offset-warning-disable t)
-  :bind (:map copilot-completion-map
-              ("C-<tab>" . copilot-accept-completion)
-              ("C-TAB" . copilot-accept-completion)))
+(if (not (eq system-type 'darwin))
+    (use-package copilot
+      :ensure t
+      :hook (prog-mode . copilot-mode)
+      :custom
+      (setq copilot-indent-offset-warning-disable t)
+      :bind (:map copilot-completion-map
+                  ("C-<tab>" . copilot-accept-completion)
+                  ("C-TAB" . copilot-accept-completion)))
+  )
 
 
 (use-package shell-maker)
@@ -1765,10 +1783,16 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 #+begin_src emacs-lisp
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((shell . t) (python . t) (emacs-lisp . t) (C . t)))
+ '((scheme . t)
+   (emacs-lisp . t)
+   (python . t)
+   (shell . t)))
 
 (setq org-confirm-babel-evaluate nil)
 #+end_src
+
+#+RESULTS:
+
 *** Org Babel async
 #+begin_src emacs-lisp
 (use-package ob-async)
@@ -2149,6 +2173,22 @@ commented auctex and evil tex because of slow pulls? i think either way it did n
       org-babel-python-command "uv run")
       ;; lsp-pyright-venv-path "/usr/local/anaconda3")
 #+end_src
+*** Racket
+#+begin_src emacs-lisp
+(use-package racket-mode)
+(use-package ob-racket
+  :after org
+  :ensure (:host github :repo "hasu/emacs-ob-racket" :files ("*.el" "*.rkt"))
+  :config
+  (add-hook 'ob-racket-pre-runtime-library-load-hook #'ob-racket-raco-make-runtime-library)
+  (setq ob-racket-default-lang "sicp")
+  (add-to-list 'org-babel-load-languages '(racket . t))
+)
+#+end_src
+
+#+RESULTS:
+: [nil 27319 61737 230610 nil elpaca-process-queues nil nil 0 nil]
+
 ** Other language and data modes
 *** Nix
 #+begin_src emacs-lisp
@@ -2167,7 +2207,7 @@ commented auctex and evil tex because of slow pulls? i think either way it did n
 *** Docker
 #+begin_src emacs-lisp
 (use-package dockerfile-mode)
-(use-package docker-compose-mode)
+;;(use-package docker-compose-mode)
 #+end_src
 *** CSV
 #+begin_src emacs-lisp
