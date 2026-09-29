@@ -808,29 +808,31 @@ most recently visited files."
 ** Processes and remote files
 *** Detached
 #+begin_src emacs-lisp
-(use-package detached
-  :ensure (detached
-           :type git
-           :host github
-           :repo "italoaa/detached.el"
-           :protocol https
-           :depth treeless
-           :inherit nil
-           :files (:defaults))
-  :init
-  (detached-init)
+(if (executable-find "dtach")
+    (use-package detached
+    :ensure (detached
+            :type git
+            :host github
+            :repo "italoaa/detached.el"
+            :protocol https
+            :depth treeless
+            :inherit nil
+            :files (:defaults))
+    :init
+    (detached-init)
 
-  :bind
-  (([remap async-shell-command] . detached-shell-command)
-   ([remap compile] . detached-compile)
-   ([remap recompile] . detached-compile-recompile)
-   ([remap detached-open-session] . detached-consult-session))
+    :bind
+    (([remap async-shell-command] . detached-shell-command)
+    ([remap compile] . detached-compile)
+    ([remap recompile] . detached-compile-recompile)
+    ([remap detached-open-session] . detached-consult-session))
 
-  :custom
-  ((detached-show-output-on-attach t)
-   (detached-terminal-data-command system-type)
-   (detached-notification-function
-    #'detached-state-transition-echo-message)))
+    :custom
+    ((detached-show-output-on-attach t)
+    (detached-terminal-data-command system-type)
+    (detached-notification-function
+        #'detached-state-transition-echo-message)))
+  )
 #+end_src
 
 *** Tramp
