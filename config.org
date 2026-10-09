@@ -1164,6 +1164,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
     "t" '(:ignore t :wk "Toggle")
     "t f" '(jinx-mode :wk "Toggle flycheck")
     "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
+    "t F" '(flyover-toggle :wk "Toggle flyover")
     "t r" '(rainbow-mode :wk "Toggle rainbow mode")
     "t u" '(org-tidy-untidy-buffer :wk "Untify current buffer until save")
     "t s" '(spacious-padding-mode :wk "Toggle spacious padding mode")
@@ -1369,13 +1370,13 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
     (use-package copilot
       :ensure t
       :hook (prog-mode . copilot-mode)
-      :custom
+      :config
       (setq copilot-indent-offset-warning-disable t)
       :bind (:map copilot-completion-map
                   ("C-<tab>" . copilot-accept-completion)
                   ("C-TAB" . copilot-accept-completion)))
   )
-
+(setq copilot-indent-offset-warning-disable t)
 
 (use-package shell-maker)
 
@@ -2162,7 +2163,9 @@ commented auctex and evil tex because of slow pulls? i think either way it did n
   (flyover-virtual-line-type 'curved-dotted-arrow)
   (flyover-wrap-messages t)
   (flyover-max-line-length 80)
-  (flyover-hide-during-completion t))
+  (flyover-hide-during-completion t)
+  (flyover-display-mode 'hide-on-same-line)
+  )
 #+end_src
 
 #+RESULTS:

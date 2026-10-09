@@ -87,7 +87,7 @@
      "ae426fc51c58ade49774264c17e666ea7f681d8cae62570630539be3d06fd964"
      default))
  '(inhibit-startup-screen t)
- '(package-selected-packages nil)
+ '(package-selected-packages '(edit-indirect))
  '(safe-local-variable-directories
    '("/Users/italo/Personal/Programming/Repos/github.com/italoaa/sicp-org/"
      "/home/italo/personal/Ledger/" "/home/italo/openchip/fineforge/"
