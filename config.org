@@ -722,9 +722,15 @@ most recently visited files."
              ;; whitespace in between, e.g. ()()(). Insert whitespace if
              ;; genuinely want to start a new form in the middle of a word.
              :unless '(sp-point-before-word-p sp-point-before-same-p)))
-  (smartparens-global-mode t))
+    (smartparens-global-mode t)
+    (add-hook 'org-mode-hook
+            (lambda () (smartparens-mode -1)))
+    )
 
 #+end_src
+
+#+RESULTS:
+: [nil 27337 65508 105352 nil elpaca-process-queues nil nil 0 nil]
 
 *** Undo tree
 #+begin_src emacs-lisp
@@ -1038,6 +1044,13 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
     "TAB b" '(persp-ivy-switch-buffer :wk "Switch buffer")
     "TAB l" '(persp-switch :wk "Switch Perspective")
     "TAB k" '(persp-switch :wk "Kill Perspective")
+    )
+
+  (flour/leader-keys
+    "r" '(:ignore t :wk "profier")
+    "r s" '((lambda () (interactive) (profiler-start 'cpu)) :wk "start profiler")
+    "r e" '(profiler-stop :wk "end profiler")
+    "r r" '(profiler-report :wk "report profiler")
     )
 
   (flour/leader-keys
@@ -1436,9 +1449,11 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 *** TODO Git gutter and fringe
 #+begin_src emacs-lisp
 (use-package git-gutter
-  :hook (prog-mode . git-gutter-mode)
+  ;; removed the hook bc it was making
+  ;; programming slow??? idk why
+  ;; :hook (prog-mode . git-gutter-mode)
   :config
-  (setq git-gutter:update-interval 0.02))
+  (setq git-gutter:update-interval 0.8))
 
 (use-package git-gutter-fringe
   :config
@@ -1946,9 +1961,9 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
             :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
                                 "#+title: ${title}\n#+filetags: :Research:Book:\n")
             :unnarrowed t)
-	("b" "Book Note" plain "\n\n\n* Main\n%?\n\n* References\n - [[file:./references/infeng.pdf]]"
+	("b" "Book Note" plain "\n\n\n* Main\n%?\n\n* References\n - [[file:./references/pmpp.pdf]]"
 	:target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+filetags: :Book:InfEng:\n")
+			    "#+title: ${title}\n#+filetags: :Book:PMPP:\n")
 	:unnarrowed t)
         ))
 
