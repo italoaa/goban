@@ -89,7 +89,8 @@
  '(inhibit-startup-screen t)
  '(package-selected-packages '(edit-indirect))
  '(safe-local-variable-directories
-   '("/Users/italo/Personal/Programming/Repos/github.com/italoaa/sicp-org/"
+   '("/home/italo/openchip/root-booster/"
+     "/Users/italo/Personal/Programming/Repos/github.com/italoaa/sicp-org/"
      "/home/italo/personal/Ledger/" "/home/italo/openchip/fineforge/"
      "/opt/fineforge/occt/" "/home/italo/openchip/fineforge/occt/"
      "/home/italo/openchip/aios-templates/"

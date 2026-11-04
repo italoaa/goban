@@ -594,21 +594,22 @@ most recently visited files."
           poimap-height 1.35
           poimap-width 0.38)
     :config
-    (poimap-mode 1)
-
     (require 'poimap-bookmark)
     (require 'poimap-current-symbol)
     (require 'poimap-flymake)
     (require 'poimap-imenu)
     (require 'poimap-isearch)
     (require 'poimap-register)
+    (require 'poimap-diff-hl)
 
     (poimap-bookmark 1)
+    (poimap-diff-hl 1)
     (poimap-current-symbol 1)
     (poimap-flymake 1)
     (poimap-imenu 1)
     (poimap-isearch 1)
-    (poimap-register 1))
+    (poimap-register 1)
+    (poimap-mode 1))
 #+end_src
 
 #+RESULTS:
@@ -986,6 +987,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
   ;; Auto complete with C-SPC
   ;; (evil-global-set-key 'insert (kbd "C-SPC") 'company-complete-common)
   (evil-global-set-key 'normal "\C-s" 'consult-line)
+  (evil-global-set-key 'normal "\C-p" 'consult-ripgrep)
   ;;(elpaca nil (define-key evil-insert-state-map (kbd " ") 'org-roam-node-insert))
 
   (evil-define-key 'insert copilot-mode-map (kbd "ç") 'copilot-accept-completion)
@@ -1378,42 +1380,39 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 
 ** AI and language tools
 *** AI
-#+begin_src emacs-lisp
+#+begin_src text
 (if (not (eq system-type 'darwin))
     (use-package copilot
       :ensure t
-      :hook (prog-mode . copilot-mode)
+      ;; :hook (prog-mode . copilot-mode)
       :config
       (setq copilot-indent-offset-warning-disable t)
       :bind (:map copilot-completion-map
                   ("C-<tab>" . copilot-accept-completion)
                   ("C-TAB" . copilot-accept-completion)))
+  (setq copilot-indent-offset-warning-disable t)
+  (use-package shell-maker)
+  (use-package agent-shell
+    :after shell-maker
+    :config
+
+    (setq agent-shell-anthropic-claude-environment
+          (agent-shell-make-environment-variables
+           "ANTHROPIC_API_KEY" "litellm-0e0c642f-b069-40a2-bb3a-1af9167cc2cd"
+           "ANTHROPIC_BASE_URL" "http://localhost:4000"))
+
+    (add-to-list 'exec-path "/etc/profiles/per-user/italo/bin/claude-code-acp")
+
+    ;; Evil state-specific RET behavior: insert mode = newline, normal mode = send
+    (evil-define-key 'insert agent-shell-mode-map (kbd "RET") #'newline)
+    (evil-define-key 'normal agent-shell-mode-map (kbd "RET") #'comint-send-input)
+
+    ;; Configure *agent-shell-diff* buffers to start in Emacs state
+    (add-hook 'diff-mode-hook
+              (lambda ()
+                (when (string-match-p "\\*agent-shell-diff\\*" (buffer-name))
+                  (evil-emacs-state)))))
   )
-(setq copilot-indent-offset-warning-disable t)
-
-(use-package shell-maker)
-
-(use-package agent-shell
-  :after shell-maker
-  :config
-
-  (setq agent-shell-anthropic-claude-environment
-        (agent-shell-make-environment-variables
-         "ANTHROPIC_API_KEY" "litellm-0e0c642f-b069-40a2-bb3a-1af9167cc2cd"
-         "ANTHROPIC_BASE_URL" "http://localhost:4000"))
-
-  (add-to-list 'exec-path "/etc/profiles/per-user/italo/bin/claude-code-acp")
-
-  ;; Evil state-specific RET behavior: insert mode = newline, normal mode = send
-  (evil-define-key 'insert agent-shell-mode-map (kbd "RET") #'newline)
-  (evil-define-key 'normal agent-shell-mode-map (kbd "RET") #'comint-send-input)
-
-  ;; Configure *agent-shell-diff* buffers to start in Emacs state
-  (add-hook 'diff-mode-hook
-            (lambda ()
-              (when (string-match-p "\\*agent-shell-diff\\*" (buffer-name))
-                (evil-emacs-state)))))
-
 #+end_src
 
 ** Syntax and structure
@@ -1446,8 +1445,23 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 (use-package occult)
 #+end_src
 ** Diagnostics and spelling
-*** TODO Git gutter and fringe
+*** Git gutter and fringe
 #+begin_src emacs-lisp
+(use-package diff-hl
+  :init
+  (global-diff-hl-mode 1)
+  :custom
+  (diff-hl-disable-on-remote 1)
+  (diff-hl-flydiff-delay 1.0)
+  :config
+  (with-eval-after-load 'magit
+    (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
+    (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
+  )
+#+end_src
+
+
+#+begin_src text
 (use-package git-gutter
   ;; removed the hook bc it was making
   ;; programming slow??? idk why
@@ -2096,6 +2110,10 @@ commented auctex and evil tex because of slow pulls? i think either way it did n
 ;; (add-to-list 'eglot-server-programs `(python-ts-mode . ,m/pyright-uvx-command))
 #+end_src
 
+*** Coverage
+#+begin_src emacs-lisp
+(use-package cov)
+#+end_src
 *** Rust
 #+begin_src emacs-lisp
 (use-package rust-mode
