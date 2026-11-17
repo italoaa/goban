@@ -594,6 +594,7 @@ most recently visited files."
           poimap-height 1.35
           poimap-width 0.38)
     :config
+    (poimap-mode 1)
     (require 'poimap-bookmark)
     (require 'poimap-current-symbol)
     (require 'poimap-flymake)
@@ -608,8 +609,7 @@ most recently visited files."
     (poimap-flymake 1)
     (poimap-imenu 1)
     (poimap-isearch 1)
-    (poimap-register 1)
-    (poimap-mode 1))
+    (poimap-register 1))
 #+end_src
 
 #+RESULTS:
@@ -640,9 +640,11 @@ most recently visited files."
 *** Perspective
 #+begin_src emacs-lisp
 (use-package perspective
+  :ensure t
   :custom
   (persp-suppress-no-prefix-key-warning t)
-  (persp-mode))
+  :config
+  (persp-mode 1))
 (force-mode-line-update)
 #+end_src
 
@@ -871,10 +873,15 @@ most recently visited files."
                (dedicated . t)
                (preserve-size . (nil . t)))))
         (ghostel-project)))))
+
+(use-package evil-ghostel
+  :ensure t
+  :after (ghostel evil)
+  :hook (ghostel-mode . evil-ghostel-mode))
 #+end_src
 
 #+RESULTS:
-: [nil 27315 56187 41882 nil elpaca-process-queues nil nil 341000 nil]
+: [nil 27388 8710 788509 nil elpaca-process-queues nil nil 491000 nil]
 
 ** Specialized modes
 *** PDF
@@ -1254,6 +1261,7 @@ The keybindings of emacs is like the flour of the bread. Because I come from doo
 #+begin_src emacs-lisp
 (use-package transient)
 (use-package magit)
+(setq ediff-split-window-function #'split-window-horizontally)
 #+end_src
 ** Structure and navigation aids
 *** Folding
