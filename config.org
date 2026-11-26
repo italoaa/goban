@@ -869,7 +869,7 @@ most recently visited files."
              '((display-buffer-in-side-window)
                (side . bottom)
                (slot . 0)
-               (window-height . 0.33)
+               (window-height . 0.80)
                (dedicated . t)
                (preserve-size . (nil . t)))))
         (ghostel-project)))))
